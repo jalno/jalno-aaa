@@ -1,0 +1,11 @@
+providers:
+  - Jalno\UserLogger\ServiceProvider
+  - Jalno\AAA\ServiceProvider
+env:
+  DB_CONNECTION: mysql
+  DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+  DB_DATABASE: araduser_jalno
+  DB_USERNAME: araduser
+  DB_PASSWORD: araduserpassword
+# laravel: /root/w/laralearn
