@@ -7,7 +7,6 @@ use dnj\AAA\Contracts\IHasPassword;
 use dnj\AAA\Contracts\IUsername;
 use dnj\AAA\Models\Concerns\HasAbilities;
 use dnj\UserLogger\Concerns\Loggable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 
 /**

@@ -11,7 +11,6 @@ class UserProvider implements AuthUserProvider
 {
     public function __construct(protected IUserManager $userManager)
     {
-        //
     }
 
     public function retrieveById($identifier): ?User
@@ -21,13 +20,11 @@ class UserProvider implements AuthUserProvider
 
     public function retrieveByToken($identifier, $token): ?User
     {
-        //
         return null;
     }
 
     public function updateRememberToken(Authenticatable $user, $token): void
     {
-        //
     }
 
     public function retrieveByCredentials(array $credentials): ?User
@@ -52,7 +49,6 @@ class UserProvider implements AuthUserProvider
         if ($user->verifyPassword($credentials['password'])) {
             return true;
         }
-        
 
         return false;
     }

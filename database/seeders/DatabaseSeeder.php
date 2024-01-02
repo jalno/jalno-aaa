@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
 use Jalno\AAA\Database\Seeders\TypeSeeder;
 use Jalno\AAA\Database\Seeders\UserSeeder;
-use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {

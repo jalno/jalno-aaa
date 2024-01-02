@@ -4,12 +4,14 @@ namespace Jalno\AAA\Http\Middleware;
 
 use Illuminate\Support\Facades\Auth;
 
-trait JalnoSessionTrait {
+trait JalnoSessionTrait
+{
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return bool if true, we find user within session, otherwise user not found.
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return bool if true, we find user within session, otherwise user not found
      */
     public function authenticateJalnoSession($request)
     {

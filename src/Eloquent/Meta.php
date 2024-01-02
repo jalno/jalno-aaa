@@ -1,7 +1,8 @@
 <?php
+
 namespace Jalno\AAA\Eloquent;
 
-use Illuminate\Database\Eloquent\Model;
+use Jalno\AAA\Models\Model;
 
 /**
  * @property int                   $id

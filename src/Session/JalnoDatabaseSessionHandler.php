@@ -5,12 +5,8 @@ namespace Jalno\AAA\Session;
 use Illuminate\Session\DatabaseSessionHandler;
 use Illuminate\Support\Carbon;
 
-class JalnoDatabaseSessionHandler extends DatabaseSessionHandler {
-    /**
-     * {@inheritdoc}
-     *
-     * @return string|false
-     */
+class JalnoDatabaseSessionHandler extends DatabaseSessionHandler
+{
     public function read($sessionId): string|false
     {
         $session = (object) $this->getQuery()->find($sessionId);
@@ -30,12 +26,9 @@ class JalnoDatabaseSessionHandler extends DatabaseSessionHandler {
         return '';
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function expired($session)
     {
-        return isset($session->lastuse_at) &&
-            $session->lastuse_at < Carbon::now()->subMinutes($this->minutes)->getTimestamp();
+        return isset($session->lastuse_at)
+            && $session->lastuse_at < Carbon::now()->subMinutes($this->minutes)->getTimestamp();
     }
 }

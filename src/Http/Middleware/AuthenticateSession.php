@@ -8,8 +8,9 @@ use Illuminate\Contracts\Session\Middleware\AuthenticatesSessions;
 class AuthenticateSession extends Authenticate implements AuthenticatesSessions
 {
     use JalnoSessionTrait;
+
     /**
-     * {@inhertdoc}
+     * {@inhertdoc}.
      */
     protected function unauthenticated($request, array $guards)
     {

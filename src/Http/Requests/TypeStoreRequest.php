@@ -3,9 +3,9 @@
 namespace Jalno\AAA\Http\Requests;
 
 use dnj\AAA\Contracts\IType;
+use Illuminate\Foundation\Http\FormRequest;
 use Jalno\AAA\Rules\AbilityRule;
 use Jalno\AAA\Rules\TypeExists;
-use Illuminate\Foundation\Http\FormRequest;
 use Yeganemehr\LaravelSupport\Http\Requests\HasExtraRules;
 
 /**

@@ -3,7 +3,7 @@
 return [
     'guestType' => null,
     'abilities' => [],
-    
+
     'online-users-time-window' => 30, // seconds
 
     'routes' => [
@@ -18,6 +18,18 @@ return [
                 'only' => ['index', 'show'],
                 'except' => ['store', 'update', 'destroy'],
             ],
+        ],
+    ],
+
+    'database' => [
+        // the default connection to use for all Jalno\AAA models
+        'models-connection-default' => null,
+
+        // The specific connection name for special model.
+        // This overrides default connection and also the connection defined in the model with $connection property
+        'models-connection' => [
+            // \Jalno\AAA\Models\Type::class => 'jalno',
+            // \Jalno\AAA\Models\User::class => 'mysql',
         ],
     ],
 
@@ -50,7 +62,6 @@ return [
                 'table' => env('JALNO_SESSION_DRIVER_DB_TABLE', 'base_sessions'),
             ],
             'cache' => [
-                //
             ],
         ],
 
