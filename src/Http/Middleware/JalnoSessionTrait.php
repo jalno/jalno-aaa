@@ -32,9 +32,9 @@ trait JalnoSessionTrait
         $store->setId($sessionIdPrefix.$sessionId);
         $store->start();
 
-        if ($userId = $store->has('userid')) {
+        if ($store->has('userid')) {
             return boolval(
-                Auth::loginUsingId($userId)
+                Auth::loginUsingId($store->get('userid'))
             );
         }
 
