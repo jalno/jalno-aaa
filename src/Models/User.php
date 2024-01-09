@@ -22,6 +22,9 @@ use Jalno\AAA\Models\Concerns\HasDynamicFields;
 
 /**
  * @property string               $name
+ * @property string               $lastname
+ * @property string               $email
+ * @property string|null          $avatar
  * @property int                  $type_id
  * @property Collection<Meta>     $meta
  * @property UserStatus           $status
