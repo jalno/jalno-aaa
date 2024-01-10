@@ -6,6 +6,7 @@ use dnj\AAA\Contracts\UserStatus as AAAUserStatus;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 
+
 class UserStatus implements CastsAttributes
 {
     /**

@@ -186,4 +186,22 @@ class UserManager implements IUserManager
 
         return $user->type->isChildOf($other->type_id);
     }
+
+    public function count(array $filters = []): int
+    {
+        return User::query()
+            ->filter($filters)
+            ->count();
+    }
+
+    public function ping(int|IUser $user): void
+    {
+        $user = User::ensureId($user);
+        DB::transaction(function () use ($user) {
+            $user = User::query()
+                ->lockForUpdate()
+                ->findOrFail($user);
+            $user->update(['lastonline' => now()]);
+        });
+    }
 }

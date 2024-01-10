@@ -5,14 +5,14 @@ namespace Jalno\AAA;
 use dnj\AAA\Contracts\ITypeManager;
 use dnj\AAA\Contracts\IUserManager;
 use Illuminate\Routing\Router;
-use Jalno\UserLogger\Contracts\ILogger;
-use Jalno\AAA\Http\Middleware\AuthenticateSession;
+use Illuminate\Session\FileSessionHandler;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as SupportServiceProvider;
-use Illuminate\Session\FileSessionHandler;
+use Jalno\AAA\Http\Middleware\AuthenticateSession;
 use Jalno\AAA\Session\JalnoDatabaseSessionHandler;
 use Jalno\AAA\Session\JalnoStore;
+use Jalno\UserLogger\Contracts\ILogger;
 
 class ServiceProvider extends SupportServiceProvider
 {
@@ -34,9 +34,9 @@ class ServiceProvider extends SupportServiceProvider
         $router->pushMiddlewareToGroup('api', 'auth.jalno');
 
         if ($this->app->runningInConsole()) {
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+            $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
             $this->publishes([
-                __DIR__ . '/../config/jalno-aaa.php' => config_path('jalno-aaa.php'),
+                __DIR__.'/../config/jalno-aaa.php' => config_path('jalno-aaa.php'),
             ], 'config');
         }
     }
@@ -44,13 +44,7 @@ class ServiceProvider extends SupportServiceProvider
     protected function registerConfiguration(): void
     {
         if (!app()->configurationIsCached()) {
-            $this->mergeConfigFrom(__DIR__ . '/../config/jalno-aaa.php', 'jalno-aaa');
-
-            // In our Eloquent models, we use 'jalno' connection to be able to set diffrent database configuration.
-            // We configure the 'jalno' connection with default connection if the end-user doesn't do that.
-            if (null === config('database.connections.jalno')) {
-                config(['database.connections.jalno' => config('database.connections.' . config('database.default'))]);
-            }
+            $this->mergeConfigFrom(__DIR__.'/../config/jalno-aaa.php', 'jalno-aaa');
 
             // The Jalno-AAA and Laravel-AAA should not use as same time.
             // So if Jalno's routing is enabled, we should disable Laravel-AAA routing disable.
@@ -91,7 +85,7 @@ class ServiceProvider extends SupportServiceProvider
         }
         $prefix = config('jalno-aaa.routes.prefix', 'api/users');
         Route::prefix($prefix)->group(function () {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+            $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
         });
     }
 

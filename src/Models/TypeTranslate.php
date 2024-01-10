@@ -6,7 +6,6 @@ use dnj\AAA\Contracts\ITypeTranslate;
 use dnj\AAA\Database\Factories\TypeTranslateFactory;
 use dnj\Localization\Eloquent\IsTranslate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**

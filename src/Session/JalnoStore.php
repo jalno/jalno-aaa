@@ -6,9 +6,6 @@ use Illuminate\Session\Store;
 
 class JalnoStore extends Store
 {
-    /**
-     * {@inheritdoc}
-     */
     public function isValidId($id)
     {
         return is_string($id);
@@ -19,19 +16,19 @@ class JalnoStore extends Store
         if ($data = $this->handler->read($this->getId())) {
             $result = null;
 
-            if ($this->serialization === 'json') {
+            if ('json' === $this->serialization) {
                 $result = json_decode($this->prepareForUnserialize($data), true);
             } else {
                 $result = @unserialize($this->prepareForUnserialize($data));
             }
-            if ($result === null or $result === false) {
+            if (null === $result or false === $result) {
                 $result = self::unserialize_php($this->prepareForUnserialize($data));
             }
-            if ($result === null or $result === false) {
+            if (null === $result or false === $result) {
                 $result = self::unserialize_phpbinary($this->prepareForUnserialize($data));
             }
 
-            if ($result !== false && is_array($result)) {
+            if (false !== $result && is_array($result)) {
                 return $result;
             }
         }
@@ -41,13 +38,13 @@ class JalnoStore extends Store
 
     private function unserialize_php($session_data): ?array
     {
-        $result = array();
+        $result = [];
         $offset = 0;
         while ($offset < strlen($session_data)) {
-            if (!strstr(substr($session_data, $offset), "|")) {
+            if (!strstr(substr($session_data, $offset), '|')) {
                 return null;
             }
-            $pos = strpos($session_data, "|", $offset);
+            $pos = strpos($session_data, '|', $offset);
             $num = $pos - $offset;
             $varname = substr($session_data, $offset, $num);
             $offset += $num + 1;
@@ -55,22 +52,25 @@ class JalnoStore extends Store
             $result[$varname] = $data;
             $offset += strlen(serialize($data));
         }
+
         return $result;
     }
 
     private function unserialize_phpbinary($session_data)
     {
-        $result = array();
+        $result = [];
         $offset = 0;
         while ($offset < strlen($session_data)) {
             $num = ord($session_data[$offset]);
-            $offset += 1;
+            ++$offset;
+
             $varname = substr($session_data, $offset, $num);
             $offset += $num;
             $data = unserialize(substr($session_data, $offset));
             $result[$varname] = $data;
             $offset += strlen(serialize($data));
         }
+
         return $result;
     }
 }

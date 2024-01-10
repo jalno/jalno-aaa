@@ -4,18 +4,17 @@ namespace Jalno\AAA\Http\Controllers;
 
 use dnj\AAA\Contracts\IUserManager;
 use dnj\AAA\Contracts\UserStatus;
-
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Jalno\AAA\Http\Requests\UsersSearchRequest;
 use Jalno\AAA\Http\Requests\UserStoreRequest;
 use Jalno\AAA\Http\Requests\UserUpdateRequest;
 use Jalno\AAA\Http\Resources\UserCollection;
 use Jalno\AAA\Http\Resources\UserResource;
 use Jalno\AAA\Models\User;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {

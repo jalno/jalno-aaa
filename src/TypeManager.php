@@ -4,11 +4,12 @@ namespace Jalno\AAA;
 
 use dnj\AAA\Contracts\IType;
 use dnj\AAA\Contracts\ITypeManager;
-use Jalno\AAA\Models\Type;
-use Jalno\AAA\Models\TypeAbility;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Jalno\AAA\Models\Type;
+use Jalno\AAA\Models\TypeAbility;
+
 
 class TypeManager implements ITypeManager
 {
@@ -66,7 +67,6 @@ class TypeManager implements ITypeManager
         bool $childToItself = false,
         bool $userActivityLog = false,
     ): Type {
-
         throw new \Exception('Currently We Are Not Support Store At This Moment!');
 
         return DB::transaction(function () use ($translates, $abilities, $childIds, $meta, $childToItself, $userActivityLog) {

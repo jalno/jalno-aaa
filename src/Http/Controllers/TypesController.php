@@ -3,16 +3,17 @@
 namespace Jalno\AAA\Http\Controllers;
 
 use dnj\AAA\Contracts\ITypeManager;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Jalno\AAA\Http\Requests\TypesSearchRequest;
 use Jalno\AAA\Http\Requests\TypeStoreRequest;
 use Jalno\AAA\Http\Requests\TypeUpdateRequest;
 use Jalno\AAA\Http\Resources\TypeCollection;
 use Jalno\AAA\Http\Resources\TypeResource;
 use Jalno\AAA\Models\Type;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
+
 
 class TypesController extends Controller
 {

@@ -16,8 +16,8 @@
 	],
 	"require": {
 		"php": "^8.1",
-		"dnj/laravel-aaa": "^1.1.0",
-		"jalno/jalno-user-logger": "^1.0.0",
+		"dnj/laravel-aaa": "dev-master as 1.1.0",
+		"jalno/jalno-user-logger": "dev-master as 1.0.0",
 		"yeganemehr/laravel-support": "^1.0.0"
 	},
 	"require-dev": {
@@ -43,8 +43,8 @@
 	},
 	"repositories": [
 		{
-			"type": "path",
-			"url": "/root/w/jalno/jalno-user-logger"
+			"type": "git",
+			"url": "https://github.com/jalno/jalno-user-logger.git"
 		}
 	],
 	"scripts": {

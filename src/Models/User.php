@@ -6,22 +6,25 @@ use dnj\AAA\Contracts\ITypeManager;
 use dnj\AAA\Contracts\IUser;
 use dnj\AAA\Contracts\IUserManager;
 use dnj\AAA\Contracts\UserStatus;
-use dnj\AAA\Models\Concerns\HasAbilities;
-use dnj\AAA\Models\Concerns\HasDynamicFields;
 use dnj\UserLogger\Concerns\Loggable;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Jalno\AAA\Casts\UserStatus as UserStatusCast;
+use Jalno\AAA\Models\Concerns\HasAbilities;
+use Jalno\AAA\Models\Concerns\HasDynamicFields;
 
 /**
  * @property string               $name
+ * @property string               $lastname
+ * @property string               $email
+ * @property string|null          $avatar
  * @property int                  $type_id
  * @property Collection<Meta>     $meta
  * @property UserStatus           $status
@@ -45,10 +48,6 @@ class User extends Model implements IUser, Authenticatable, Authorizable
         return intval(config('jalno-aaa.online-users-time-window'));
     }
 
-    protected $connection = 'jalno';
-
-    protected ?Username $activeUsername = null;
-
     /**
      * Indicates if the model should be timestamped.
      *
@@ -56,9 +55,13 @@ class User extends Model implements IUser, Authenticatable, Authorizable
      */
     public $timestamps = false;
 
+
+    protected ?Username $activeUsername = null;
+
     protected $casts = [
         'status' => UserStatusCast::class,
         'lastonline' => 'datetime',
+        'registered_at' => 'datetime',
         'has_custom_permissions' => 'boolean',
     ];
 
@@ -91,7 +94,11 @@ class User extends Model implements IUser, Authenticatable, Authorizable
     public function scopeFilter(Builder $query, array $filters): void
     {
         if (isset($filters['id'])) {
-            $query->where('id', $filters['id']);
+            if (is_array($filters['id'])) {
+                $query->whereIn('id', $filters['id']);
+            } else {
+                $query->where('id', $filters['id']);
+            }
         }
         if (isset($filters['name'])) {
             $query->where('name', 'LIKE', $filters['name']);
@@ -121,7 +128,7 @@ class User extends Model implements IUser, Authenticatable, Authorizable
             $user = $userManager->findOrFail($user);
         }
         if (!$user instanceof self) {
-            throw new \Exception('This method just work with ' . self::class);
+            throw new \Exception('This method just work with '.self::class);
         }
         /**
          * @var ITypeManager
@@ -193,11 +200,6 @@ class User extends Model implements IUser, Authenticatable, Authorizable
         return $this->meta->pluck('value', 'name')->toArray();
     }
 
-    protected function getFullnameAttribute(): string
-    {
-        return $this->name . ' ' . $this->lastname;
-    }
-
     /**
      * @return string[]
      */
@@ -236,6 +238,21 @@ class User extends Model implements IUser, Authenticatable, Authorizable
         return '';
     }
 
+    public function getCreatedAt(): Carbon
+    {
+        return $this->registered_at;
+    }
+
+    public function getUpdatedAt(): ?Carbon
+    {
+        return null;
+    }
+
+    public function getPingAt(): ?Carbon
+    {
+        return $this->lastonline;
+    }
+
     public function verifyPassword(string $password): bool
     {
         return Hash::check($password, $this->password);
@@ -243,20 +260,23 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
     /**
      * Get an attribute from the model.
-     * In Jalno's UserPanel we use type key to store id of the type, and now, we try to convert type to type_id
+     * In Jalno's UserPanel we use type key to store id of the type, and now, we try to convert type to type_id.
      *
-     * @param  string  $key
-     * @return mixed
+     * @param string $key
      */
     public function getAttribute($key)
     {
-        switch ($key) {
-            case 'type':
-            case 'type_id':
-                $this->attributes['type_id'] = $this->attributes['type_id'] ?? $this->attributes['type'];
-                unset($this->attributes['type']);
-            default: return parent::getAttribute($key);
+        if ('type' == $key or 'type_id' == $key) {
+            $this->attributes['type_id'] = $this->attributes['type_id'] ?? $this->attributes['type'];
+            unset($this->attributes['type']);
         }
+
+        return parent::getAttribute($key);
+    }
+
+    protected function getFullnameAttribute(): string
+    {
+        return $this->name.' '.$this->lastname;
     }
 
     protected function getUsernamesAttribute(): Collection
