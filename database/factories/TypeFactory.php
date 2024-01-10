@@ -5,6 +5,7 @@ namespace Jalno\AAA\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Jalno\AAA\Models\Type;
 
+
 /**
  * @extends Factory<Type>
  */

@@ -11,6 +11,7 @@ class UserProvider implements AuthUserProvider
 {
     public function __construct(protected IUserManager $userManager)
     {
+
     }
 
     public function retrieveById($identifier): ?User

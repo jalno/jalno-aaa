@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Jalno\AAA\Models\Type;
 use Jalno\AAA\Models\TypeAbility;
 
+
 class TypeManager implements ITypeManager
 {
     public static function getTypeId(int|IType $type): int
@@ -147,6 +148,7 @@ class TypeManager implements ITypeManager
     public function destroy(int|IType $type, bool $userActivityLog = false): void
     {
         throw new \Exception('Currently We Are Not Support Destroy At This Moment!');
+
         DB::transaction(function () use ($type, $userActivityLog) {
             /**
              * @var Type

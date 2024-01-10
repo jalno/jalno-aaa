@@ -35,9 +35,11 @@ trait JalnoSessionTrait
         if ($store->has('userid')) {
             return boolval(
                 Auth::loginUsingId($store->get('userid'))
+
             );
         }
 
         return false;
     }
 }
+

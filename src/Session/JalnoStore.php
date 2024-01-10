@@ -63,6 +63,7 @@ class JalnoStore extends Store
         while ($offset < strlen($session_data)) {
             $num = ord($session_data[$offset]);
             ++$offset;
+
             $varname = substr($session_data, $offset, $num);
             $offset += $num;
             $data = unserialize(substr($session_data, $offset));

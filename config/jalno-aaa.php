@@ -3,7 +3,6 @@
 return [
     'guestType' => null,
     'abilities' => [],
-
     'online-users-time-window' => 30, // seconds
 
     'routes' => [
@@ -62,6 +61,8 @@ return [
                 'table' => env('JALNO_SESSION_DRIVER_DB_TABLE', 'base_sessions'),
             ],
             'cache' => [
+                //
+
             ],
         ],
 
@@ -69,4 +70,5 @@ return [
             'name' => 'PHPSESSID',
         ],
     ],
+
 ];

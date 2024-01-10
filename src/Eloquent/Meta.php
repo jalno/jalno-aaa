@@ -4,6 +4,7 @@ namespace Jalno\AAA\Eloquent;
 
 use Jalno\AAA\Models\Model;
 
+
 /**
  * @property int                   $id
  * @property string                $name

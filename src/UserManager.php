@@ -134,6 +134,7 @@ class UserManager implements IUserManager
     public function destroy(int|IUser $user, bool $userActivityLog = false): void
     {
         throw new \Exception('We Are Not Support Destroy At This Moment!');
+
         DB::transaction(function () use ($user, $userActivityLog) {
             /**
              * @var User

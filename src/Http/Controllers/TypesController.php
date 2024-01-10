@@ -14,6 +14,7 @@ use Jalno\AAA\Http\Resources\TypeCollection;
 use Jalno\AAA\Http\Resources\TypeResource;
 use Jalno\AAA\Models\Type;
 
+
 class TypesController extends Controller
 {
     use AuthorizesRequests;

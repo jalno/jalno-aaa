@@ -55,6 +55,7 @@ class User extends Model implements IUser, Authenticatable, Authorizable
      */
     public $timestamps = false;
 
+
     protected ?Username $activeUsername = null;
 
     protected $casts = [
