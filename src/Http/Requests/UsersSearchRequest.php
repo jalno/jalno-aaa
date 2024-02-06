@@ -26,10 +26,12 @@ class UsersSearchRequest extends FormRequest
         return [
             'id' => ['sometimes', 'required', 'numeric'],
             'name' => ['sometimes', 'required', 'string'],
+            'lastname' => ['sometimes', 'required', 'string'],
+            'email' => ['sometimes', 'required', 'string'],
+            'cellphone' => ['sometimes', 'required', 'string'],
+            'word' => ['sometimes', 'required', 'string'],
             'type_id' => ['sometimes', 'required', app(TypeExists::class)->userHasAccess($this->user())],
             'status' => ['sometimes', 'required', Rule::enum(UserStatus::class)],
-            'username' => ['sometimes', 'required', 'string'],
-            'online' => ['sometimes', 'required', 'boolean'],
         ];
     }
 }

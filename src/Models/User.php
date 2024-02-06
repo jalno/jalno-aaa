@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Jalno\AAA\Casts\UserStatus as UserStatusCast;
+Use Jalno\AAA\Contracts\Comparison;
 use Jalno\AAA\Models\Concerns\HasAbilities;
 use Jalno\AAA\Models\Concerns\HasDynamicFields;
 
@@ -93,6 +94,9 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
     public function scopeFilter(Builder $query, array $filters): void
     {
+
+        $comparison = $filters['comparison'] ?? null;
+
         if (isset($filters['id'])) {
             if (is_array($filters['id'])) {
                 $query->whereIn('id', $filters['id']);
@@ -100,11 +104,58 @@ class User extends Model implements IUser, Authenticatable, Authorizable
                 $query->where('id', $filters['id']);
             }
         }
+
+        $word = $filters['word'] ?? null;
+        if ($word) {
+            $query->where(function(Builder $parenthesis) use ($filters, $word, $comparison): void {
+                foreach (["name", "lastname", "email", "cellphone"] as $field) {
+                    if (isset($filters[$field])) {
+                        continue;
+                    }
+                    Comparison::forQueryBuilder(
+                        fn (string|null $operator, string $value) => $parenthesis->orWhere($field, $operator, $value),
+                        $word,
+                        $comparison
+                    );
+                }
+                Comparison::forQueryBuilder(
+                    fn (string|null $operator, string $value) => $parenthesis->orWhereRaw(
+                        "CONCAT(`name`, ' ', `lastname`)".($operator ?: '=').'?',
+                        $value
+                    ),
+                    $word,
+                    $comparison
+                );
+            });
+        }
+
         if (isset($filters['name'])) {
-            $query->where('name', 'LIKE', $filters['name']);
+            Comparison::forQueryBuilder(
+                fn (string|null $operator, string $value) => $query->where('name', $operator, $filters['name']),
+                $filters['name'],
+                $comparison
+            );
         }
         if (isset($filters['lastname'])) {
-            $query->where('lastname', 'LIKE', $filters['lastname']);
+            Comparison::forQueryBuilder(
+                fn (string|null $operator, string $value) => $query->where('lastname', $operator, $filters['lastname']),
+                $filters['lastname'],
+                $comparison
+            );
+        }
+        if (isset($filters['email'])) {
+            Comparison::forQueryBuilder(
+                fn (string|null $operator, string $value) => $query->where('email', $operator, $filters['email']),
+                $filters['email'],
+                $comparison
+            );
+        }
+        if (isset($filters['cellphone'])) {
+            Comparison::forQueryBuilder(
+                fn (string|null $operator, string $value) => $query->where('cellphone', $operator, $filters['cellphone']),
+                $filters['cellphone'],
+                $comparison
+            );
         }
         $typeId = $filters['type_id'] ?? $filters['type'] ?? null;
         if (!is_null($typeId)) {
