@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as SupportServiceProvider;
 use Jalno\AAA\Http\Middleware\AuthenticateSession;
 use Jalno\AAA\Session\JalnoDatabaseSessionHandler;
+use Illuminate\Support\Carbon;
 use Jalno\AAA\Session\JalnoStore;
 use Jalno\UserLogger\Contracts\ILogger;
 
@@ -103,11 +104,20 @@ class ServiceProvider extends SupportServiceProvider
         $driver = strtolower(config('jalno-aaa.jalno-session.driver'));
 
         $handler = match ($driver) {
-            'php' => new FileSessionHandler(
+            'php' => new class(
                 app(\Illuminate\Filesystem\Filesystem::class),
                 config('jalno-aaa.jalno-session.options.php.save_path'),
                 config('jalno-aaa.jalno-session.lifetime'),
-            ),
+            ) extends FileSessionHandler {
+                public function read($sessionId): string|false
+                {
+                    if ($this->files->isFile($path = $this->path.'/'.$sessionId) &&
+                        $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
+                        return $this->files->get($path);
+                    }
+                    return '';
+                }
+            },
             'db' => new JalnoDatabaseSessionHandler(
                 app(\Illuminate\Database\ConnectionResolverInterface::class)->connection(
                     config('jalno-aaa.jalno-session.options.db.connection', 'jalno')
