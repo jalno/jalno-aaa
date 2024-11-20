@@ -2,7 +2,9 @@
 
 namespace Jalno\AAA\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Jalno\AAA\Database\Factories\TypeAbilityFactory;
 
 /**
  * @property int    $id
@@ -12,6 +14,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TypeAbility extends Model
 {
+    /**
+     * @use HasFactory<TypeAbilityFactory>
+     */
+    use HasFactory;
+
+    protected static function newFactory(): TypeAbilityFactory
+    {
+        return TypeAbilityFactory::new();
+    }
+
     public $timestamps = false;
 
     /**

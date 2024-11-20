@@ -15,7 +15,7 @@ trait JalnoSessionTrait
      */
     public function authenticateJalnoSession($request)
     {
-        $cookieName = config('jalno-aaa.jalno-session.cookie.name', 'PHPSESSID');
+        $cookieName = config('jalno-aaa.session.cookie.name', 'PHPSESSID');
         if (!$request->hasCookie($cookieName) or $request->user()) {
             return false;
         }
@@ -23,11 +23,11 @@ trait JalnoSessionTrait
 
         /** @var \Illuminate\Contracts\Session\Session */
         $store = app('session.jalno-store');
-        $sessionIdPrefix = match (config('jalno-aaa.jalno-session.driver')) {
+        $sessionIdPrefix = match (config('jalno-aaa.session.driver')) {
             'db' => '',
             'php' => 'sess_',
             'cache' => 'session-',
-            default => ''
+            default => '',
         };
         $store->setId($sessionIdPrefix.$sessionId);
         $store->start();
@@ -35,11 +35,9 @@ trait JalnoSessionTrait
         if ($store->has('userid')) {
             return boolval(
                 Auth::loginUsingId($store->get('userid'))
-
             );
         }
 
         return false;
     }
 }
-

@@ -12,10 +12,10 @@ enum Comparison: string
     /**
      * @return \Closure(string $operator, string|null $value)
      */
-    public static function forQueryBuilder(\Closure $fn, string $value = null, self|string $comparison = null): void
+    public static function forQueryBuilder(\Closure $fn, ?string $value = null, self|string|null $comparison = null): void
     {
         if (!$comparison or !$value) {
-            $fn(null, $value);
+            $fn('=', $value);
         } else {
             if (is_string($comparison)) {
                 $comparison = self::from($comparison);

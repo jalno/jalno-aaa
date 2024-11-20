@@ -3,14 +3,18 @@
 namespace Jalno\AAA\Models;
 
 use dnj\AAA\Contracts\IType;
+use dnj\AAA\Contracts\ITypeManager;
 use dnj\AAA\Contracts\IUser;
 use dnj\AAA\Models\Concerns\HasAbilities;
 use dnj\AAA\Models\TypeTranslate;
 use dnj\UserLogger\Concerns\Loggable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Jalno\AAA\Contracts\Comparison;
+use Jalno\AAA\Database\Factories\TypeFactory;
 use Jalno\AAA\Eloquent\HasNotTranslate;
 
 /**
@@ -30,9 +34,19 @@ class Type extends Model implements IType
     use Loggable;
     use HasNotTranslate;
 
+    /**
+     * @use HasFactory<TypeFactory>
+     */
+    use HasFactory;
+
     public static function ensureId(int|IType $value): int
     {
         return $value instanceof IType ? $value->getId() : $value;
+    }
+
+    protected static function newFactory(): TypeFactory
+    {
+        return TypeFactory::new();
     }
 
     public $timestamps = false;
@@ -74,6 +88,12 @@ class Type extends Model implements IType
             } else {
                 $query->where('id', $filters['id']);
             }
+        }
+        if (isset($filters['title'])) {
+            Comparison::forQueryBuilder(
+                fn (?string $operator, string $value) => $query->where('title', $operator, $filters['title']),
+                $filters['title'],
+            );
         }
         if (isset($filters['hasFullAccess']) and $filters['hasFullAccess']) {
             $this->scopeHasFullAccess($query);

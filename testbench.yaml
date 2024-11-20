@@ -1,5 +1,6 @@
 providers:
   - Jalno\UserLogger\ServiceProvider
+  - dnj\AAA\ServiceProvider
   - Jalno\AAA\ServiceProvider
 env:
   DB_CONNECTION: mysql

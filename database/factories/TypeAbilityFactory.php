@@ -1,10 +1,10 @@
 <?php
 
-namespace dnj\AAA\Database\Factories;
+namespace Jalno\AAA\Database\Factories;
 
-use dnj\AAA\Models\Type;
-use dnj\AAA\Models\TypeAbility;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Jalno\AAA\Models\Type;
+use Jalno\AAA\Models\TypeAbility;
 
 /**
  * @extends Factory<TypeAbility>
@@ -16,7 +16,7 @@ class TypeAbilityFactory extends Factory
     public function definition()
     {
         return [
-            'type_id' => Type::factory(),
+            'type' => Type::factory(),
             'name' => fake()->words(3, true),
         ];
     }
@@ -24,7 +24,7 @@ class TypeAbilityFactory extends Factory
     public function withType(int|Type $type): static
     {
         return $this->state(fn () => [
-            'type_id' => $type,
+            'type' => $type,
         ]);
     }
 

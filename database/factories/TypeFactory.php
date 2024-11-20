@@ -5,7 +5,6 @@ namespace Jalno\AAA\Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Jalno\AAA\Models\Type;
 
-
 /**
  * @extends Factory<Type>
  */
@@ -16,17 +15,14 @@ class TypeFactory extends Factory
     public function definition()
     {
         return [
-            'meta' => ['key' => 'value'],
+            'title' => fake()->jobTitle(),
         ];
     }
 
-    /**
-     * @param array<mixed,mixed> $meta
-     */
-    public function withMeta(array $meta): static
+    public function withTitle(string $title): static
     {
         return $this->state(fn () => [
-            'meta' => $meta,
+            'title' => $title,
         ]);
     }
 }

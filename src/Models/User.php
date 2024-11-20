@@ -6,6 +6,7 @@ use dnj\AAA\Contracts\ITypeManager;
 use dnj\AAA\Contracts\IUser;
 use dnj\AAA\Contracts\IUserManager;
 use dnj\AAA\Contracts\UserStatus;
+use dnj\AAA\Models\Username;
 use dnj\UserLogger\Concerns\Loggable;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -17,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Jalno\AAA\Casts\UserStatus as UserStatusCast;
-Use Jalno\AAA\Contracts\Comparison;
+use Jalno\AAA\Contracts\Comparison;
+use Jalno\AAA\Database\Factories\UserFactory;
 use Jalno\AAA\Models\Concerns\HasAbilities;
 use Jalno\AAA\Models\Concerns\HasDynamicFields;
 
@@ -26,10 +28,12 @@ use Jalno\AAA\Models\Concerns\HasDynamicFields;
  * @property string               $lastname
  * @property string               $email
  * @property string|null          $avatar
+ * @property string|null          $remember_token
  * @property int                  $type_id
  * @property Collection<Meta>     $meta
  * @property UserStatus           $status
  * @property Type                 $type
+ * @property Country              $country
  * @property Collection<Username> $usernames
  */
 class User extends Model implements IUser, Authenticatable, Authorizable
@@ -37,6 +41,10 @@ class User extends Model implements IUser, Authenticatable, Authorizable
     use HasAbilities;
     use HasDynamicFields;
     use Loggable;
+
+    /**
+     * @use HasFactory<UserFactory>
+     */
     use HasFactory;
 
     public static function ensureId(int|IUser $value): int
@@ -49,6 +57,11 @@ class User extends Model implements IUser, Authenticatable, Authorizable
         return intval(config('jalno-aaa.online-users-time-window'));
     }
 
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
+
     /**
      * Indicates if the model should be timestamped.
      *
@@ -56,12 +69,9 @@ class User extends Model implements IUser, Authenticatable, Authorizable
      */
     public $timestamps = false;
 
-
-    protected ?Username $activeUsername = null;
-
     protected $casts = [
         'status' => UserStatusCast::class,
-        'lastonline' => 'datetime',
+        'lastonline' => 'timestamp',
         'registered_at' => 'datetime',
         'has_custom_permissions' => 'boolean',
     ];
@@ -71,6 +81,7 @@ class User extends Model implements IUser, Authenticatable, Authorizable
         'lastname',
         'type', // Note: you should use type instead of type_id for query builder!
         'status',
+        'lastonline',
     ];
 
     protected $guarded = [
@@ -94,7 +105,6 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
     public function scopeFilter(Builder $query, array $filters): void
     {
-
         $comparison = $filters['comparison'] ?? null;
 
         if (isset($filters['id'])) {
@@ -107,19 +117,19 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
         $word = $filters['word'] ?? null;
         if ($word) {
-            $query->where(function(Builder $parenthesis) use ($filters, $word, $comparison): void {
-                foreach (["name", "lastname", "email", "cellphone"] as $field) {
+            $query->where(function (Builder $parenthesis) use ($filters, $word, $comparison): void {
+                foreach (['name', 'lastname', 'email', 'cellphone'] as $field) {
                     if (isset($filters[$field])) {
                         continue;
                     }
                     Comparison::forQueryBuilder(
-                        fn (string|null $operator, string $value) => $parenthesis->orWhere($field, $operator, $value),
+                        fn (?string $operator, string $value) => $parenthesis->orWhere($field, $operator, $value),
                         $word,
                         $comparison
                     );
                 }
                 Comparison::forQueryBuilder(
-                    fn (string|null $operator, string $value) => $parenthesis->orWhereRaw(
+                    fn (?string $operator, string $value) => $parenthesis->orWhereRaw(
                         "CONCAT(`name`, ' ', `lastname`)".($operator ?: '=').'?',
                         $value
                     ),
@@ -131,28 +141,28 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
         if (isset($filters['name'])) {
             Comparison::forQueryBuilder(
-                fn (string|null $operator, string $value) => $query->where('name', $operator, $filters['name']),
+                fn (?string $operator, string $value) => $query->where('name', $operator, $filters['name']),
                 $filters['name'],
                 $comparison
             );
         }
         if (isset($filters['lastname'])) {
             Comparison::forQueryBuilder(
-                fn (string|null $operator, string $value) => $query->where('lastname', $operator, $filters['lastname']),
+                fn (?string $operator, string $value) => $query->where('lastname', $operator, $filters['lastname']),
                 $filters['lastname'],
                 $comparison
             );
         }
         if (isset($filters['email'])) {
             Comparison::forQueryBuilder(
-                fn (string|null $operator, string $value) => $query->where('email', $operator, $filters['email']),
+                fn (?string $operator, string $value) => $query->where('email', $operator, $filters['email']),
                 $filters['email'],
                 $comparison
             );
         }
         if (isset($filters['cellphone'])) {
             Comparison::forQueryBuilder(
-                fn (string|null $operator, string $value) => $query->where('cellphone', $operator, $filters['cellphone']),
+                fn (?string $operator, string $value) => $query->where('cellphone', $operator, $filters['cellphone']),
                 $filters['cellphone'],
                 $comparison
             );
@@ -221,6 +231,11 @@ class User extends Model implements IUser, Authenticatable, Authorizable
         return $this->belongsTo(Type::class, 'type_id', 'id');
     }
 
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country');
+    }
+
     public function meta(): HasMany
     {
         return $this->hasMany(UserMeta::class, 'user');
@@ -271,7 +286,12 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
     public function getAuthPassword(): string
     {
-        return $this->usernames->first()?->password ?? '';
+        return $this->password;
+    }
+
+    public function getAuthPasswordName(): string
+    {
+        return 'password';
     }
 
     public function getRememberToken(): ?string
@@ -286,7 +306,7 @@ class User extends Model implements IUser, Authenticatable, Authorizable
 
     public function getRememberTokenName(): string
     {
-        return '';
+        return 'remember_token';
     }
 
     public function getCreatedAt(): Carbon

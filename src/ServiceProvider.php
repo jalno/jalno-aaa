@@ -5,15 +5,13 @@ namespace Jalno\AAA;
 use dnj\AAA\Contracts\ITypeManager;
 use dnj\AAA\Contracts\IUserManager;
 use Illuminate\Routing\Router;
-use Illuminate\Session\FileSessionHandler;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as SupportServiceProvider;
 use Jalno\AAA\Http\Middleware\AuthenticateSession;
 use Jalno\AAA\Session\JalnoDatabaseSessionHandler;
-use Illuminate\Support\Carbon;
+use Jalno\AAA\Session\JalnoFileSessionHandler;
 use Jalno\AAA\Session\JalnoStore;
-use Jalno\UserLogger\Contracts\ILogger;
 
 class ServiceProvider extends SupportServiceProvider
 {
@@ -57,14 +55,8 @@ class ServiceProvider extends SupportServiceProvider
 
     protected function registerManagers(): void
     {
-        $this->app->extend(
-            ITypeManager::class,
-            fn ($parent, $app) => new TypeManager($app->make(ILogger::class))
-        );
-        $this->app->extend(
-            IUserManager::class,
-            fn ($parent, $app) => new UserManager($app->make(ILogger::class))
-        );
+        $this->app->singleton(ITypeManager::class, TypeManager::class);
+        $this->app->singleton(IUserManager::class, UserManager::class);
     }
 
     protected function registerUserProvider(): void
@@ -92,48 +84,27 @@ class ServiceProvider extends SupportServiceProvider
 
     /**
      * Register the Jalno's session driver instance.
-     *
-     * @return void
      */
-    protected function registerSessionDriver()
+    protected function registerSessionDriver(): void
     {
-        if (!config('jalno-aaa.jalno-session.enable')) {
+        if (!config('jalno-aaa.session.enable')) {
             return;
         }
 
-        $driver = strtolower(config('jalno-aaa.jalno-session.driver'));
+        $this->app->singleton('session.jalno-store', function ($app) {
+            $driver = strtolower(config('jalno-aaa.session.driver'));
 
-        $handler = match ($driver) {
-            'php' => new class(
-                app(\Illuminate\Filesystem\Filesystem::class),
-                config('jalno-aaa.jalno-session.options.php.save_path'),
-                config('jalno-aaa.jalno-session.lifetime'),
-            ) extends FileSessionHandler {
-                public function read($sessionId): string|false
-                {
-                    if ($this->files->isFile($path = $this->path.'/'.$sessionId) &&
-                        $this->files->lastModified($path) >= Carbon::now()->subMinutes($this->minutes)->getTimestamp()) {
-                        return $this->files->get($path);
-                    }
-                    return '';
-                }
-            },
-            'db' => new JalnoDatabaseSessionHandler(
-                app(\Illuminate\Database\ConnectionResolverInterface::class)->connection(
-                    config('jalno-aaa.jalno-session.options.db.connection', 'jalno')
-                ),
-                config('jalno-aaa.jalno-session.options.db.table', 'base_sessions'),
-                config('jalno-aaa.jalno-session.lifetime')
-            ),
-        };
-        $serialization = match ($driver) {
-            'php' => 'php',
-            'db' => 'json',
-        };
+            $handler = match ($driver) {
+                'php' => JalnoFileSessionHandler::create(),
+                'db' => JalnoDatabaseSessionHandler::create(),
+            };
+            $serialization = match ($driver) {
+                'php' => 'php',
+                'db' => 'json',
+            };
 
-        $this->app->singleton('session.jalno-store', function ($app) use ($handler, $serialization) {
             return new JalnoStore(
-                config('jalno-aaa.jalno-session.cookie.name', 'PHPSESSID'),
+                config('jalno-aaa.session.cookie.name', 'PHPSESSID'),
                 $handler,
                 null,
                 $serialization

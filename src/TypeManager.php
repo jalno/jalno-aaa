@@ -6,10 +6,8 @@ use dnj\AAA\Contracts\IType;
 use dnj\AAA\Contracts\ITypeManager;
 use dnj\UserLogger\Contracts\ILogger;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Jalno\AAA\Models\Type;
 use Jalno\AAA\Models\TypeAbility;
-
 
 class TypeManager implements ITypeManager
 {
@@ -67,104 +65,17 @@ class TypeManager implements ITypeManager
         bool $childToItself = false,
         bool $userActivityLog = false,
     ): Type {
-        throw new \Exception('Currently We Are Not Support Store At This Moment!');
-
-        return DB::transaction(function () use ($translates, $abilities, $childIds, $meta, $childToItself, $userActivityLog) {
-            /**
-             * @var Type
-             */
-            $type = Type::query()->create([
-                'meta' => $meta,
-            ]);
-            foreach ($translates as $locale => $fields) {
-                $type->addTranslate($locale, $fields);
-            }
-            $type->abilities()->createMany(array_map(fn ($name) => ['name' => $name], $abilities));
-            foreach ($childIds as $childId) {
-                $type->children()->attach($childId, [], false);
-            }
-            if ($childToItself) {
-                $type->children()->attach($type->id, [], false);
-            }
-
-            if ($userActivityLog) {
-                $this->userLogger
-                    ->on($type)
-                    ->withRequest(request())
-                    ->log('created');
-            }
-
-            return $type;
-        });
+        throw new \LogicException('Currently We Are Not Support Store At This Moment!');
     }
 
     public function update(int|IType $type, array $changes, bool $userActivityLog = false): Type
     {
-        throw new \Exception('Currently We Are Not Support Update At This Moment!');
-
-        return DB::transaction(function () use ($type, $changes, $userActivityLog) {
-            $needToRefresh = false;
-            /**
-             * @var Type
-             */
-            $type = Type::query()
-                ->lockForUpdate()
-                ->findOrFail(self::getTypeId($type));
-            if (isset($changes['translates'])) {
-                $type->updateTranslates($changes['translates']);
-                unset($changes['translates']);
-                $needToRefresh = true;
-            }
-            if (isset($changes['abilities'])) {
-                $type->updateAbilities($changes['abilities']);
-                unset($changes['abilities']);
-                $needToRefresh = true;
-            }
-            if (isset($changes['childIds'])) {
-                $type->updateChildIds($changes['childIds']);
-                unset($changes['childIds']);
-                $needToRefresh = true;
-            }
-            $type->fill($changes);
-            $changes = $type->changesForLog();
-            $type->save();
-
-            if ($userActivityLog) {
-                $this->userLogger
-                    ->on($type)
-                    ->withRequest(request())
-                    ->withProperties($changes)
-                    ->log('updated');
-            }
-
-            if ($needToRefresh) {
-                $type->refresh();
-            }
-
-            return $type;
-        });
+        throw new \LogicException('Currently We Are Not Support Update At This Moment!');
     }
 
     public function destroy(int|IType $type, bool $userActivityLog = false): void
     {
-        throw new \Exception('Currently We Are Not Support Destroy At This Moment!');
-
-        DB::transaction(function () use ($type, $userActivityLog) {
-            /**
-             * @var Type
-             */
-            $type = Type::query()
-                ->lockForUpdate()
-                ->findOrFail(self::getTypeId($type));
-            $type->delete();
-            if ($userActivityLog) {
-                $this->userLogger
-                    ->on($type)
-                    ->withRequest(request())
-                    ->withProperties($type->toArray())
-                    ->log('deleted');
-            }
-        });
+        throw new \LogicException('Currently We Are Not Support Destroy At This Moment!');
     }
 
     public function isParentOf(int|IType $type, int|IType $other): bool

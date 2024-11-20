@@ -2,39 +2,26 @@
 
 namespace Jalno\AAA;
 
-use dnj\AAA\Contracts\IUserManager;
+use dnj\AAA\UserProvider as AAAUserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\UserProvider as AuthUserProvider;
 use Jalno\AAA\Models\User;
 
-class UserProvider implements AuthUserProvider
+class UserProvider extends AAAUserProvider
 {
-    public function __construct(protected IUserManager $userManager)
+    public function updateRememberToken(Authenticatable $user, $token): void
     {
-
-    }
-
-    public function retrieveById($identifier): ?User
-    {
-        return $this->userManager->find($identifier);
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('user must be an instance of '.User::class);
+        }
+        $user->remember_token = $token;
+        $user->save();
     }
 
     public function retrieveByToken($identifier, $token): ?User
     {
-        return null;
-    }
+        $user = $this->userManager->find($identifier);
 
-    public function updateRememberToken(Authenticatable $user, $token): void
-    {
-    }
-
-    public function retrieveByCredentials(array $credentials): ?User
-    {
-        if (!isset($credentials['username'])) {
-            return null;
-        }
-
-        return $this->userManager->findByUsername($credentials['username']);
+        return $user->remember_token === $token ? $user : null;
     }
 
     public function validateCredentials(Authenticatable $user, array $credentials): bool
@@ -45,12 +32,22 @@ class UserProvider implements AuthUserProvider
         if (!$user instanceof User) {
             return false;
         }
-        /** @var User $user */
-        $user = $this->userManager->findByUsername($credentials['username']);
-        if ($user->verifyPassword($credentials['password'])) {
-            return true;
+
+        return $user->verifyPassword($credentials['password']);
+    }
+
+    public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
+    {
+        if (!$user instanceof User) {
+            throw new \InvalidArgumentException('user must be an instance of '.User::class);
         }
 
-        return false;
+        if (!$this->hasher->needsRehash($user->password) && !$force) {
+            return;
+        }
+
+        $user->forceFill([
+            'password' => $this->hasher->make($credentials['password']),
+        ])->save();
     }
 }

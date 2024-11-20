@@ -20,7 +20,7 @@ enum Comparison: string
             Comparison::ENDSWITH => ['LIKE', '%'.$value],
             Comparison::CONTAINS => ['LIKE', '%'.$value.'%'],
             Comparison::EQUALS => ['=', $value],
-            null => [null, $value]
+            null => [null, $value],
         };
     }
 }
